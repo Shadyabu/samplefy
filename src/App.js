@@ -88,12 +88,13 @@ const App = () => {
             const trackFeature = trackInfo.find(info => info.id === track.id);
             const key = trackFeature ? getKey(trackFeature) : 'Loading...';
             const bpm = trackFeature ? Math.round(trackFeature.tempo) : 'Loading...';
+            const timeSig = trackFeature ? Math.round(trackFeature.time_signature) : 'Loading...';
             return (
               <Card key={track.id}>
                 <Card.Img src={track.album.images[0].url} />
                 <Card.Body>
                   <Card.Title>{track.name}</Card.Title>
-                  <Card.Text>{track.artists[0].name} - {key},  {bpm}bpm</Card.Text>
+                  <Card.Text>{track.artists[0].name} - {key},  {bpm}bpm <br/> {timeSig}/4 Time Signature</Card.Text>
                 </Card.Body>
               </Card>
             );
