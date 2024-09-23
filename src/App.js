@@ -5,8 +5,9 @@ import { Container, InputGroup, FormControl, Button, Row, Card } from 'react-boo
 import { useState, useEffect } from "react";
 
 const CLIENT_ID = "a68cc005665b405195de169076b6cc54";
+// I know this is not best practice but it is a free API and I want
+// users to access the site without having to create their own key
 const CLIENT_SECRET = "06f9da1c92a04ca4aab566bc9e1e3a07";
-
 
 const App = () => {
   const [searchInput, setSearchInput] = useState("");
@@ -68,7 +69,7 @@ const App = () => {
       <Container>
         <InputGroup className="mb-3" size="lg">
           <FormControl
-            placeholder="search for a song to get its key, bpm and time signature"
+            placeholder="search song to get key, bpm and time signature"
             type="input"
             onKeyPress={event => {
               if (event.key === "Enter") {
@@ -83,7 +84,7 @@ const App = () => {
         </InputGroup>
       </Container>
       <Container>
-        <Row className="mx-2 row row-cols-4">
+        <Row className="mx-2 row row-cols-1 row-cols-sm-2 row-cols-md-4">
           {tracks.map((track, i) => {
             const trackFeature = trackInfo.find(info => info.id === track.id);
             const key = trackFeature ? getKey(trackFeature) : 'Loading...';
