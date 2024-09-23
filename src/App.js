@@ -68,7 +68,7 @@ const App = () => {
       <Container>
         <InputGroup className="mb-3" size="lg">
           <FormControl
-            placeholder="search for song to get its data"
+            placeholder="search for a song to get its key, bpm and time signature"
             type="input"
             onKeyPress={event => {
               if (event.key === "Enter") {
