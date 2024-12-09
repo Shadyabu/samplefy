@@ -5,8 +5,6 @@ import { Container, InputGroup, FormControl, Button, Row, Card } from 'react-boo
 import { useState, useEffect } from "react";
 
 const CLIENT_ID = "09ebffd7ee3540df930a97fe318c87db";
-// I know this is not best practice but it is a free API and I want
-// users to access the site without having to create their own key
 const CLIENT_SECRET = "d4275be364e24ee99dc41511991312e3";
 
 const App = () => {
@@ -19,10 +17,11 @@ const App = () => {
     const authParameters = {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: 'grant_type=client_credentials&client_id=' + CLIENT_ID + '&client_secret=' + CLIENT_SECRET 
+      body: `grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}`,
     };
+
     fetch('https://accounts.spotify.com/api/token', authParameters)
       .then(result => result.json())
       .then(data => setAccessToken(data.access_token));
@@ -31,37 +30,40 @@ const App = () => {
   const searchParameters = {
     method: 'GET',
     headers: {
-      'Authorization': 'Bearer ' + accessToken
-    }
+      Authorization: `Bearer ${accessToken}`,
+    },
   };
 
   const getKey = (song) => {
-    let scaleString = '';
-
-    if (song.key === -1) {
-      scaleString = 'No Key Detected';
-    } else {
-      const keys = ['C', 'C#/D♭', 'D', 'D#/E♭', 'E', 'F', 'F#/G♭', 'G', 'G#/A♭', 'A', 'A#/B♭', 'B'];
-      scaleString = keys[song.key];
-      scaleString += song.mode === 1 ? ' Major' : ' Minor';
-    }
-
-    return scaleString;
+    if (!song) return 'No Key Detected';
+    const keys = ['C', 'C#/D♭', 'D', 'D#/E♭', 'E', 'F', 'F#/G♭', 'G', 'G#/A♭', 'A', 'A#/B♭', 'B'];
+    const key = keys[song.key] || 'Unknown Key';
+    return `${key} ${song.mode === 1 ? 'Major' : 'Minor'}`;
   };
 
   const search = async () => {
-    const searchResult = await fetch('https://api.spotify.com/v1/search?q=' + searchInput + '&type=track', searchParameters)
-      .then(response => response.json())
-      .then(data => data.tracks.items);
+    try {
+      const searchResult = await fetch(
+        `https://api.spotify.com/v1/search?q=${encodeURIComponent(searchInput)}&type=track`,
+        searchParameters
+      )
+        .then(response => response.json())
+        .then(data => data.tracks.items);
 
-    setTracks(searchResult);
+      setTracks(searchResult);
 
-    const idString = searchResult.map(track => track.id).join(',');
-    const trackRequest = await fetch("https://api.spotify.com/v1/audio-features/?ids=" + idString, searchParameters)
-      .then(response => response.json())
-      .then(data => data.audio_features);
+      const idString = searchResult.map(track => track.id).join(',');
+      const trackRequest = await fetch(
+        `https://api.spotify.com/v1/audio-features/?ids=${idString}`,
+        searchParameters
+      )
+        .then(response => response.json())
+        .then(data => data.audio_features);
 
-    setTrackInfo(trackRequest);
+      setTrackInfo(trackRequest || []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   };
 
   return (
@@ -69,33 +71,34 @@ const App = () => {
       <Container>
         <InputGroup className="mb-3" size="lg">
           <FormControl
-            placeholder="search song to get key, bpm and time signature"
+            placeholder="Search song to get key, BPM, and time signature"
             type="input"
-            onKeyPress={event => {
+            onKeyPress={(event) => {
               if (event.key === "Enter") {
                 search();
               }
             }}
-            onChange={event => setSearchInput(event.target.value)}
+            onChange={(event) => setSearchInput(event.target.value)}
           />
-          <Button onClick={search}>
-            Search
-          </Button>
+          <Button onClick={search}>Search</Button>
         </InputGroup>
       </Container>
       <Container>
         <Row className="mx-2 row row-cols-1 row-cols-sm-2 row-cols-md-4">
-          {tracks.map((track, i) => {
-            const trackFeature = trackInfo.find(info => info.id === track.id);
+          {tracks.map((track) => {
+            const trackFeature = trackInfo?.find((info) => info?.id === track.id);
             const key = trackFeature ? getKey(trackFeature) : 'Loading...';
             const bpm = trackFeature ? Math.round(trackFeature.tempo) : 'Loading...';
             const timeSig = trackFeature ? Math.round(trackFeature.time_signature) : 'Loading...';
+
             return (
               <Card key={track.id}>
                 <Card.Img src={track.album.images[0].url} />
                 <Card.Body>
                   <Card.Title>{track.name}</Card.Title>
-                  <Card.Text>{track.artists[0].name} - {key},  {bpm}bpm <br/> {timeSig}/4 Time Signature</Card.Text>
+                  <Card.Text>
+                    {track.artists[0].name} - {key}, {bpm} BPM <br /> {timeSig}/4 Time Signature
+                  </Card.Text>
                 </Card.Body>
               </Card>
             );
