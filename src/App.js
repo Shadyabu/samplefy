@@ -4,10 +4,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, InputGroup, FormControl, Button, Row, Card } from 'react-bootstrap';
 import { useState, useEffect } from "react";
 
-const CLIENT_ID = "a68cc005665b405195de169076b6cc54";
+const CLIENT_ID = "09ebffd7ee3540df930a97fe318c87db";
 // I know this is not best practice but it is a free API and I want
 // users to access the site without having to create their own key
-const CLIENT_SECRET = "06f9da1c92a04ca4aab566bc9e1e3a07";
+const CLIENT_SECRET = "d4275be364e24ee99dc41511991312e3";
 
 const App = () => {
   const [searchInput, setSearchInput] = useState("");
