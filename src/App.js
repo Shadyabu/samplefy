@@ -4,8 +4,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, InputGroup, FormControl, Button, Row, Card } from 'react-bootstrap';
 import { useState, useEffect } from "react";
 
-const CLIENT_ID = "09ebffd7ee3540df930a97fe318c87db";
-const CLIENT_SECRET = "d4275be364e24ee99dc41511991312e3";
+const CLIENT_ID = "af6edef54fc4489aada2ed3b6784108e";
+const CLIENT_SECRET = "a9af3010609848d4882b72610e4f7af0";
 
 const App = () => {
   const [searchInput, setSearchInput] = useState("");
@@ -47,28 +47,40 @@ const App = () => {
         `https://api.spotify.com/v1/search?q=${encodeURIComponent(searchInput)}&type=track`,
         searchParameters
       )
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Search API Error: ${response.status}`);
+          }
+          return response.json();
+        })
         .then(data => data.tracks.items);
-
+  
       setTracks(searchResult);
-
+  
       const idString = searchResult.map(track => track.id).join(',');
       const trackRequest = await fetch(
         `https://api.spotify.com/v1/audio-features/?ids=${idString}`,
         searchParameters
-      )
-        .then(response => response.json())
-        .then(data => data.audio_features);
-
-      setTrackInfo(trackRequest || []);
+      );
+  
+      if (!trackRequest.ok) {
+        const errorText = await trackRequest.text();
+        console.error('Audio Features API Error:', errorText);
+        throw new Error(`Spotify API returned status ${trackRequest.status}`);
+      }
+  
+      const data = await trackRequest.json();
+      setTrackInfo(data.audio_features || []);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
+  
 
   return (
     <div className="Test">
       <Container>
+        Due to an Update to the Spotify API advanced audio features used in this application are now deprecated (ie. no longer supported by the API) <br/><br/><br/>
         <InputGroup className="mb-3" size="lg">
           <FormControl
             placeholder="Search song to get key, BPM, and time signature"
